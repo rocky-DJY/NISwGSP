@@ -1,3 +1,0 @@
-/home/nvidia/DJY/project/NISwGSP/build/CMakeFiles/rebuild_cache.dir
-/home/nvidia/DJY/project/NISwGSP/build/CMakeFiles/NISwGSP.dir
-/home/nvidia/DJY/project/NISwGSP/build/CMakeFiles/edit_cache.dir
