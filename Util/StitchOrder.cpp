@@ -1,4 +1,5 @@
 #include "StitchOrder.h"
+#define MATRIX
 int surf_match(const cv::Mat& img1, const cv::Mat& img2)
 {
     //step1: Detect the keypoints using SURF Detector
@@ -90,8 +91,9 @@ inline double test_one(const Mat &a, const Mat &b)
 
 vector<vector<bool>> Stitch_Order(vector<cv::Mat> &images)
 {
+    auto start = system_clock::now();
     int s_rect = images[0].rows * images[0].cols;  //图像面积
-    int dimension = 2400;
+    int dimension = 3200;
 
     vector<vector<bool>> res(images.size(),vector<bool>(images.size(),false));
     vector<vector<int>> dis(images.size(),vector<int>(images.size(),0));
@@ -119,57 +121,63 @@ vector<vector<bool>> Stitch_Order(vector<cv::Mat> &images)
         pair<int,int> temp = image_parallel[i];
         Mat input = image_space[temp.first][temp.second][temp.first];
         Mat target = image_space[temp.first][temp.second][temp.second];
-        auto start = system_clock::now();
+
         // dis[temp.first][temp.second] = surf_match(input,target);
         // cuda surf //
         dis[temp.first][temp.second] = GetMatchPointCount(input,target);
-        auto end   = system_clock::now();
-        auto duration = duration_cast<microseconds>(end - start);
-        cout <<  "cost: "
-        << double(duration.count()) * microseconds::period::num / microseconds::period::den
-        << "s" << endl;
     }
     // 设置阈值 //
     int threshold = s_rect / dimension;
-    //cout<<"s: "<<threshold<<endl;
+    cout<<"s_threshold: "<<s_rect<<"  "<<threshold<<endl;
     for(int i =0;i<dis.size();i++){
         for(int j =i+1;j<dis.size();j++){
+#ifdef MATRIX
             cout<<dis[i][j]<<"  ";
+#endif
             if(dis[i][j]>threshold)
                 res[i][j] = 1;
         }
+#ifdef MATRIX
         cout<<endl;
+#endif
     }
-    for(int i =0;i<res.size();i++){
-        for(int j=res.size()-1;j>i+1;j--){
-            if(res[i][j]){
-                // col serach
-                int flag0 = 0;
-                for(int k = i+1;k<j;k++){
-                    if(res[k][j]){
-                        flag0 = 1;
-                        break;
-                    }
-                }
-                // row search
-                int flag1 = 0;
-                for(int u = j-1;u>i;u--){
-                    if(res[i][u]){
-                        flag1=1;
-                        break;
-                    }
-                }
-                if(flag0 & flag1)
-                    res[i][j] = false;
-            }
-        }
-    }
+//    for(int i =0;i<res.size();i++){
+//        for(int j=res.size()-1;j>i+1;j--){
+//            if(res[i][j]){
+//                // col serach
+//                int flag0 = 0;
+//                for(int k = i+1;k<j;k++){
+//                    if(res[k][j]){
+//                        flag0 = 1;
+//                        break;
+//                    }
+//                }
+//                // row search
+//                int flag1 = 0;
+//                for(int u = j-1;u>i;u--){
+//                    if(res[i][u]){
+//                        flag1=1;
+//                        break;
+//                    }
+//                }
+//                if(flag0 & flag1)
+//                    res[i][j] = false;
+//            }
+//        }
+//    }
     cout<<  "**---------------------*** "<<endl;
+#ifdef MATRIX
     for(auto &ele:res){
         for(auto e:ele){
             cout<<e<<",";
         }
         cout<<endl;
     }
+#endif
+    auto end   = system_clock::now();
+    auto duration = duration_cast<microseconds>(end - start);
+//    cout <<  "cost: "
+//    << double(duration.count()) * microseconds::period::num / microseconds::period::den
+//    << "s" << endl;
     return res;
 }

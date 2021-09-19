@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 #include "../Configure.h"
 #include "../Util/InputParser.h"
-
+// #include <assert.h>
 class Parameter {
 public:
     Parameter(const string & _file_name);

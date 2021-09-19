@@ -46,17 +46,14 @@ Parameter::Parameter(const string & _file_name) {
 
     
     file_name = _file_name;
-    file_dir = "./input-42-data/" + _file_name + "/";
-    result_dir = "./input-42-data/0_results/" + _file_name + "-result/";
+    file_dir = "./test_file/" + _file_name + "/";
+    result_dir = "./test_file/0_results/" + _file_name + "-result/";
     
-//	_mkdir("./input-42-data/0_results/");
-//	_mkdir(result_dir.c_str());
-	mkdir("./input-42-data/0_results/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
+
+    mkdir("./test_file/0_results/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     mkdir(result_dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #ifndef NDEBUG
     debug_dir = "./input-42-data/1_debugs/" + _file_name + "-result/";
-//	_mkdir("./input-42-data/1_debugs/");
-//	_mkdir(debug_dir.c_str());
 	mkdir("./input-42-data/1_debugs/", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
     mkdir(debug_dir.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 #endif
@@ -142,7 +139,6 @@ Parameter::Parameter(const string & _file_name) {
 const vector<vector<bool> > & Parameter::getImagesMatchGraph() const{
     //cout<<"check: "<<images_match_graph_manually.empty()<<endl;
     if(1) {
-        //cout<<"mmt"<<endl;
         /*** check ***/
         queue<int> que;
         vector<bool> label(images_count, false);
@@ -157,7 +153,11 @@ const vector<vector<bool> > & Parameter::getImagesMatchGraph() const{
                 }
             }
         }
-        assert(std::all_of(label.begin(), label.end(), [](bool i){return i;}));
+        if(!std::all_of(label.begin(), label.end(), [](bool i){return i;})){
+            printf("match_miss");
+            exit(68);
+        }
+
         // printError("F(getImagesMatchGraph) image match graph verification [2] didn't be implemented yet");
         return images_match_graph_automatically_; /* TODO */
     }

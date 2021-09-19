@@ -41,8 +41,9 @@ cv::Mat Blending(const vector<cv::Mat> & images,
     for(int i = 0; i < origins.size(); ++i) {
         rects.emplace_back(origins[i], images[i].size());
     }
+#pragma omp parallel for num_threads(THREADS)
     for(int y = 0; y < result.rows; ++y) {
-#pragma omp parallel for
+#pragma omp parallel for num_threads(THREADS)
         for(int x = 0; x < result.cols; ++x) {
             cv::Point2i p(x, y);
             cv::Vec3f pixel_sum(0, 0, 0);

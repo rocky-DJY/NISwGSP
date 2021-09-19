@@ -34,7 +34,7 @@ Mat NISwGSP_Stitching::solve(const BLENDING_METHODS & _blend_method) {
     vector<pair<int, double> > b_vector;
     //cout<<"start"<<endl;
     reserveData(triplets, b_vector, DIMENSION_2D);   // 耗时点  有问题
-    //cout<<"here"<<endl;
+
     triplets.emplace_back(0, 0, STRONG_CONSTRAINT);
     triplets.emplace_back(1, 1, STRONG_CONSTRAINT);
     b_vector.emplace_back(0,    STRONG_CONSTRAINT);

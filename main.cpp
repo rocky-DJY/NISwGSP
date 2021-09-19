@@ -19,13 +19,18 @@ int main(int argc, char **argv) {
     cout << "nThreads = " << Eigen::nbThreads() << endl;
     cout << "[#Images : " << argc - 1 << "]" << endl;
 
-    string datapath = "APAP-train";
+    //vector<string> path ={"1","2","3","4","5","6","7","8"};
+    vector<string> path ={"6"};
     TimeCalculator timer;
-    for(int i = 1; i < 2; ++i) {
+    int core_threads =8;
+    if (path.size()<8)
+        core_threads = path.size();
+// #pragma omp parallel for num_threads(core_threads)
+    for(int i = 0; i < path.size(); ++i) {
         // out << "i = " << i << ", [Images : " << argv[i] << "]" << endl;
         timer.start();
         
-        MultiImages multi_images(argv[1], LINES_FILTER_WIDTH, LINES_FILTER_LENGTH);
+        MultiImages multi_images(path[i], LINES_FILTER_WIDTH, LINES_FILTER_LENGTH);
         // MultiImages multi_images(datapath, LINES_FILTER_WIDTH, LINES_FILTER_LENGTH);
 
         

@@ -13,7 +13,6 @@
 MultiImages::MultiImages(const string & _file_name,
                          LINES_FILTER_FUNC * _width_filter,
                          LINES_FILTER_FUNC * _length_filter) : parameter(_file_name) {
-    // this->feature_matches = getFeatureMatches(images_match_graph_pair_list);  // 耗时点  数据竞争？
     vector<cv::Mat> images_pack(parameter.image_file_full_names.size());
     for (int i = 0; i < parameter.image_file_full_names.size(); i++) {
         // cout<<parameter.image_file_full_names[i]<<endl;
@@ -794,10 +793,9 @@ const vector<vector<vector<pair<int, int> > > > & MultiImages::getFeaturePairs()
 //            }
 //        }
 //        pthread_exit(NULL);
-// 并行问题点
-    int max_thread = 8;
-    if(match_pairs.size()<8)
-        max_thread = match_pairs.size();
+        int max_thread = THREADS;
+        if(match_pairs.size()<THREADS)
+            max_thread = match_pairs.size();
  #pragma omp parallel for num_threads(max_thread)
         for(int i = 0; i < match_pairs.size(); ++i) {
             // const pair<int, int> &match_pair = images_match_graph_pair_list[i];
@@ -927,7 +925,7 @@ vector<pair<int, int> > MultiImages::getInitialFeaturePairs(const pair<int, int>
     const int feature_size[PAIR_COUNT] = { feature_size_1, feature_size_2 };
     const int pair_match[PAIR_COUNT] = { _match_pair.first , _match_pair.second };
     vector<FeatureDistance> feature_pairs[PAIR_COUNT];
-
+ #pragma omp parallel for num_threads(THREADS)
     for(int p = 0; p < pair_count; ++p) {
         const int another_feature_size = feature_size[1 - p];
         const int nearest_k = min(nearest_size, another_feature_size);
@@ -1053,7 +1051,9 @@ Mat MultiImages::textureMapping(const vector<vector<Point2> > & _vertices,
         affine_transforms.reserve(polygons_indices.size() * (images_data[i].mesh_2d->getTriangulationIndices().size()));
         Mat polygon_index_mask(rects[i].height + shift.y, rects[i].width + shift.x, CV_32SC1, Scalar::all(NO_GRID));
         int label = 0;
+        #pragma omp parallel for num_threads(THREADS)
         for(int j = 0; j < polygons_indices.size(); ++j) {
+            #pragma omp parallel for num_threads(THREADS)
             for(int k = 0; k < images_data[i].mesh_2d->getTriangulationIndices().size(); ++k) {
                 const Indices & index = images_data[i].mesh_2d->getTriangulationIndices()[k];
                 const Point2i contour[] = {
@@ -1078,7 +1078,9 @@ Mat MultiImages::textureMapping(const vector<vector<Point2> > & _vertices,
         }
         Mat image = Mat::zeros(rects[i].height + shift.y, rects[i].width + shift.x, CV_8UC4);
         Mat w_mask = (_blend_method != BLEND_AVERAGE) ? Mat::zeros(image.size(), CV_32FC1) : Mat();
+        //#pragma omp parallel for num_threads(THREADS)
         for(int y = 0; y < image.rows; ++y) {
+            //#pragma omp parallel for num_threads(THREADS)
             for(int x = 0; x < image.cols; ++x) {
                 int polygon_index = polygon_index_mask.at<int>(y, x);
                 if(polygon_index != NO_GRID) {
